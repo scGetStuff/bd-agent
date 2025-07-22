@@ -2,6 +2,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 
 load_dotenv()
@@ -13,11 +14,13 @@ def main():
     print("Hello from bd-agent!")
 
     words = readArgs()
+    messages = [
+        types.Content(role="user", parts=[types.Part(text=words)]),
+    ]
 
     stuff = client.models.generate_content(
         model="gemini-2.0-flash-001",
-        contents=words,
-        # contents="Why is Boot.dev such a great place to learn backend development? Use one paragraph maximum.",
+        contents=messages,
     )
 
     print(stuff.text)
@@ -30,7 +33,6 @@ def readArgs():
         print('Usage: uv run main.py "a bunch of words"')
         sys.exit(1)
 
-    # "Why are episodes 7-9 so much worse than 1-6?"
     return sys.argv[1]
 
 
