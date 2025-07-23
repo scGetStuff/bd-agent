@@ -7,9 +7,7 @@ def get_file_content(working_directory, file_path) -> (str, str):
 
     try:
         workFullPath = os.path.abspath(working_directory)
-        # print(f"workFullPath: {workFullPath}")
         fileFullPath = os.path.abspath(os.path.join(workFullPath, file_path))
-        # print(f"fileFullPath: {fileFullPath}")
 
         if os.path.commonpath((workFullPath, fileFullPath)) != workFullPath:
             return (
