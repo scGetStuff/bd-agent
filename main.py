@@ -24,15 +24,10 @@ def main():
         contents=messages,
     )
 
-    # L6
     if isVerbose:
         print(f"User prompt: {inputWords}")
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-
-    # print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-    # print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-    # print(response.text)
 
 
 def readArgs() -> (str, bool):
