@@ -7,6 +7,7 @@ from functions.get_files_info import schema_get_files_info
 from functions.get_file_content import schema_get_file_content
 from functions.run_python import schema_run_python_file
 from functions.write_file import schema_write_file
+from functions.call_function import call_function
 
 
 load_dotenv()
@@ -80,7 +81,11 @@ All paths you provide should be relative to the working directory. You do not ne
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
 
     for fun in response.function_calls:
-        print(f"Calling function: {fun.name}({fun.args})")
+        # print(f"Calling function: {fun.name}({fun.args})")
+
+        # CH3 L4
+        funResult = call_function(fun, isVerbose)
+        print(funResult.parts[0].function_response.response)
 
     if len(response.function_calls) == 0:
         print("Response:")
