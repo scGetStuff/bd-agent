@@ -69,7 +69,7 @@ All paths you provide should be relative to the working directory. You do not ne
         tools=[available_functions], system_instruction=system_prompt
     )
 
-    response = client.models.generate_content(
+    modelResponse = client.models.generate_content(
         model="gemini-2.0-flash-001",
         contents=messages,
         config=cfg,
@@ -77,19 +77,27 @@ All paths you provide should be relative to the working directory. You do not ne
 
     if isVerbose:
         print(f"User prompt: {inputWords}")
-        print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-        print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+        print(f"Prompt tokens: {modelResponse.usage_metadata.prompt_token_count}")
+        print(f"Response tokens: {modelResponse.usage_metadata.candidates_token_count}")
 
-    for fun in response.function_calls:
+    for fun in modelResponse.function_calls:
         # print(f"Calling function: {fun.name}({fun.args})")
 
         # CH3 L4
-        funResult = call_function(fun, isVerbose)
-        print(funResult.parts[0].function_response.response)
+        callContent = call_function(fun, isVerbose)
+        funResult = callContent.parts[0].function_response.response
 
-    if len(response.function_calls) == 0:
+        if funResult is None:
+            print(f"Executing {fun.name} did bad stuff")
+            sys.exit(1)
+
+        if isVerbose:
+            # print(f"-> {funResult.get("result", "")}")
+            print(f"-> {funResult}")
+
+    if len(modelResponse.function_calls) == 0:
         print("Response:")
-        print(response.text)
+        print(modelResponse.text)
 
 
 def readArgs() -> (str, bool):
