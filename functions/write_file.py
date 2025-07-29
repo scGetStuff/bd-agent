@@ -2,7 +2,7 @@ import os
 from google.genai import types
 
 
-def write_file(working_directory, file_path, content) -> str:
+def write_file(working_directory: str, file_path: str, content: str) -> str:
     try:
         workFullPath = os.path.abspath(working_directory)
         fileFullPath = os.path.abspath(os.path.join(workFullPath, file_path))

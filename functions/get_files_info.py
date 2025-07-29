@@ -1,11 +1,12 @@
 import os
+from typing import List
 from google.genai import types
 
 
 # TODO: mixing formatting with the data irritates me; should be split
-def get_files_info(working_directory, directory=".") -> str:
+def get_files_info(working_directory: str, directory: str = ".") -> str:
 
-    out = []
+    out: List[str] = []
 
     s = f"'{directory}'"
     if directory == ".":

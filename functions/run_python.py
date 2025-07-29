@@ -1,9 +1,10 @@
 import os
 import subprocess
+from typing import List
 from google.genai import types
 
 
-def run_python_file(working_directory, file_path, args=[]):
+def run_python_file(working_directory: str, file_path: str, args: List[str] = []):
     try:
         workFullPath: str = os.path.abspath(working_directory)
         fileFullPath: str = os.path.abspath(os.path.join(workFullPath, file_path))
@@ -32,7 +33,7 @@ def run_python_file(working_directory, file_path, args=[]):
         print(f"STDERR: {cp.stderr}")
         if cp.returncode != 0:
             print(f"Process exited with code {cp.returncode}")
-        if cp.stdout == "":
+        if not cp.stdout:
             print("No output produced")
 
         return ""

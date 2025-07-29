@@ -1,10 +1,11 @@
 import os
+from typing import Tuple
 from google.genai import types
 
 MAX_CHARS = 10000
 
 
-def get_file_content(working_directory, file_path) -> (str, str):
+def get_file_content(working_directory: str, file_path: str) -> Tuple[str, str]:
 
     try:
         workFullPath = os.path.abspath(working_directory)

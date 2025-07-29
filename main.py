@@ -1,5 +1,7 @@
 import os
 import sys
+from typing import List, Tuple
+
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -25,26 +27,35 @@ def main():
     generate_content(client, messages, isVerbose)
 
 
-def generate_content(client: genai.Client, messages: [types.Content], isVerbose: bool):
+def generate_content(
+    client: genai.Client, messages: List[types.Content], isVerbose: bool
+):  # pyright: ignore[reportUnknownParameterType]
 
     cfg = types.GenerateContentConfig(
-        tools=[available_functions], system_instruction=system_prompt
+        tools=[available_functions],
+        system_instruction=system_prompt,  # pyright: ignore[reportCallIssue]
     )
 
-    modelResponse = client.models.generate_content(
-        model="gemini-2.0-flash-001",
-        contents=messages,
-        config=cfg,
+    modelResponse = (
+        client.models.generate_content(  # pyright: ignore[reportUnknownMemberType]
+            model="gemini-2.0-flash-001",
+            contents=messages,
+            config=cfg,
+        )
     )
 
     if isVerbose:
-        print(f"Prompt tokens: {modelResponse.usage_metadata.prompt_token_count}")
-        print(f"Response tokens: {modelResponse.usage_metadata.candidates_token_count}")
+        print(
+            f"Prompt tokens: {modelResponse.usage_metadata.prompt_token_count}"  # pyright: ignore[reportOptionalMemberAccess]
+        )
+        print(
+            f"Response tokens: {modelResponse.usage_metadata.candidates_token_count}"  # pyright: ignore[reportOptionalMemberAccess]
+        )
 
     if not modelResponse.function_calls:
-        return response.text
+        return modelResponse.text
 
-    funResponses = []
+    funResponses: List[types.Part] = []
     for fun in modelResponse.function_calls:
         callContent = call_function(fun, isVerbose)
 
@@ -60,7 +71,8 @@ def generate_content(client: genai.Client, messages: [types.Content], isVerbose:
         raise Exception("no function responses generated, exiting.")
 
 
-def readArgs() -> (str, bool):
+def readArgs() -> Tuple[str, bool]:
+
     if len(sys.argv) < 2:
         print(f'Usage: uv run main.py "a bunch of words" <{VERBOSE}>')
         sys.exit(1)
