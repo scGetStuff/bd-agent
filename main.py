@@ -24,18 +24,28 @@ def main():
         types.Content(role="user", parts=[types.Part(text=inputWords)]),
     ]
 
-    generate_content(client, messages, isVerbose)
+    cfg = types.GenerateContentConfig(
+        tools=[available_functions],
+        system_instruction=system_prompt,
+    )
+
+    try:
+        for i in range(20):  # pyright: ignore[reportUnusedVariable]
+            # print(f"LEN: {len(messages)}")
+            out = generate_content(cfg, client, messages, isVerbose)
+            if out:
+                print(out)
+                break
+    except Exception as e:
+        print(e)
 
 
 def generate_content(
-    client: genai.Client, messages: List[types.Content], isVerbose: bool
-):  # pyright: ignore[reportUnknownParameterType]
-
-    cfg = types.GenerateContentConfig(
-        tools=[available_functions],
-        system_instruction=system_prompt,  # pyright: ignore[reportCallIssue]
-    )
-
+    cfg: types.GenerateContentConfig,
+    client: genai.Client,
+    messages: List[types.Content],
+    isVerbose: bool,
+):
     modelResponse = (
         client.models.generate_content(  # pyright: ignore[reportUnknownMemberType]
             model="gemini-2.0-flash-001",
@@ -43,7 +53,6 @@ def generate_content(
             config=cfg,
         )
     )
-
     if isVerbose:
         print(
             f"Prompt tokens: {modelResponse.usage_metadata.prompt_token_count}"  # pyright: ignore[reportOptionalMemberAccess]
@@ -51,6 +60,11 @@ def generate_content(
         print(
             f"Response tokens: {modelResponse.usage_metadata.candidates_token_count}"  # pyright: ignore[reportOptionalMemberAccess]
         )
+
+    if modelResponse.candidates:
+        for candidate in modelResponse.candidates:
+            if candidate.content:
+                messages.append(candidate.content)
 
     if not modelResponse.function_calls:
         return modelResponse.text
@@ -66,6 +80,10 @@ def generate_content(
             print(f"-> {callContent.parts[0].function_response.response}")
 
         funResponses.append(callContent.parts[0])
+        types.Content(
+            role="user",
+            parts=[callContent.parts[0]],
+        )
 
     if not funResponses:
         raise Exception("no function responses generated, exiting.")
