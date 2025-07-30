@@ -12,32 +12,40 @@ from functions.call_function import call_function, available_functions
 
 load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
 VERBOSE = "--verbose"
 
 
 def main():
     print("Hello from bd-agent!")
 
+    client = genai.Client(api_key=api_key)
+    
     inputWords, isVerbose = readArgs()
     messages = [
         types.Content(role="user", parts=[types.Part(text=inputWords)]),
     ]
-
+    
     cfg = types.GenerateContentConfig(
         tools=[available_functions],
         system_instruction=system_prompt,
     )
 
-    try:
-        for i in range(20):  # pyright: ignore[reportUnusedVariable]
-            # print(f"LEN: {len(messages)}")
+    MAX_ITERS = 20
+    iters = 0
+    while True:
+        iters += 1
+        if iters > MAX_ITERS:
+            print(f"Maximum iterations ({MAX_ITERS}) reached.")
+            sys.exit(1)
+
+        try:
             out = generate_content(cfg, client, messages, isVerbose)
             if out:
+                print("Final response:")
                 print(out)
                 break
-    except Exception as e:
-        print(e)
+        except Exception as e:
+            print(f"Error in generate_content: {e}")
 
 
 def generate_content(
@@ -80,13 +88,11 @@ def generate_content(
             print(f"-> {callContent.parts[0].function_response.response}")
 
         funResponses.append(callContent.parts[0])
-        types.Content(
-            role="user",
-            parts=[callContent.parts[0]],
-        )
 
     if not funResponses:
         raise Exception("no function responses generated, exiting.")
+
+    messages.append(types.Content(role="tool", parts=funResponses))
 
 
 def readArgs() -> Tuple[str, bool]:
